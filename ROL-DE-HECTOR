@@ -1,5 +1,9 @@
 Partes donde yo, Hector, debo intervenir: Conexiones y APIs
 
+> Para la guía operativa y paso a paso de mis tareas, ver también [HECTOR-STEPS.md](./HECTOR-STEPS.md)
+> 
+> **Herramienta de Testing:** Usar [hector-test-dashboard.html](./hector-test-dashboard.html) para probar todos los inputs/outputs sin depender de la consola
+
 Mi rol se centra en todo lo que implique comunicación externa y automatización de servicios, especialmente mediante N8N y APIs de terceros. A continuación, marco por fases:
 
 

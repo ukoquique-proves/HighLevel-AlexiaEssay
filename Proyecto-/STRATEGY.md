@@ -4,6 +4,12 @@
 
 Our primary objective is to build a robust, end-to-end CRM automation workflow. We have successfully completed the initial phases, including lead validation and mock AI ad generation.
 
+---
+
+### Historical Context
+
+For details on previous pivots, including the Ariaia integration and product commercialization strategy, see [BUSINESS_STRATEGY_UPDATE.md](./BUSINESS_STRATEGY_UPDATE.md).
+
 We are currently in **Phase 3: CRM Integration**. However, direct integration with the HighLevel API is **currently blocked**. This is because the available HighLevel account is a free/trial version, which does not grant the necessary API access to create private applications and generate authentication tokens.
 
 ---
@@ -26,8 +32,47 @@ This involves using a new workflow, `crm-lead-workflow-phase3-mock.json`, which 
 
 This section explains how to navigate the project's documentation in the context of our current strategy.
 
+---
+
+## 4. Business Vertical Extensibility
+
+The workflow is designed to support multiple business types, starting with Fashion SME (Small and Medium Enterprise) and generic businesses. The `businessType` field determines which set of fields and validation rules apply.
+
+- If `businessType` is `"fashion_sme"`, the workflow expects and validates Fashion SME-specific fields (e.g., `fashionSector`, `currentChannels`, `brandDifferentiation`, etc.).
+- If another type or omitted, only the generic fields are required, and the workflow remains compatible with other business verticals.
+
+This approach allows the system to be easily extended in the future for new industries or business types, simply by adding new validation and processing logic for each type.
+
+### Example Input Schema
+
+```json
+{
+  "businessType": "fashion_sme",  // or "generic", "other"
+  "name": "Maria Rodriguez",
+  "email": "maria@fashionstore.com",
+  "phone": "+57 300 123 4567",
+  "service": "marketing",
+  "company": "Boutique Maria",
+  "budget": "500-1000",
+  "message": "Necesito ayuda con marketing digital para mi tienda de ropa femenina",
+  // Fashion SME-specific fields (only required if businessType is "fashion_sme"):
+  "fashionSector": "moda-femenina",           // moda-femenina, moda-masculina, infantil, accesorios, etc.
+  "country": "colombia",
+  "city": "Bogotá",
+  "currentChannels": ["instagram", "facebook", "tienda-fisica"],
+  "monthlySales": "1000-5000",
+  "marketingBudget": "500-1000",
+  "hasProductImages": true,
+  "brandDifferentiation": "Ropa hecha a mano con materiales ecológicos",
+  "objective": "aumentar-ventas"             // aumentar-ventas, captar-leads, lanzar-producto, fidelizar-clientes
+}
+```
+
 -   **`FIRST_STEPS.md`**
     -   **Purpose**: The starting point for any new team member.
+-   **`ROL-DE-HECTOR`**
+    -   **Purpose**: Defines the responsibilities and phases for Hector, focused on API connections, N8N orchestration, and automation. See also `HECTOR-STEPS.md` for Hector's operational step-by-step guide.
+    -   **Testing Tool**: Use `hector-test-dashboard.html` for comprehensive web-based testing of all workflow inputs/outputs without console dependency.
     -   **Relation**: It introduces the project's high-level **architectural vision** (the hybrid n8n + Python model). You should read this file first to understand our goals.
 
 -   **`STRATEGY.md` (This Document)**

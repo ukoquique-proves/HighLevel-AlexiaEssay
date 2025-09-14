@@ -58,21 +58,61 @@ curl -v -X POST "http://localhost:5678/webhook/crm-lead" \
 - Some node parameters require specific formatting
 - Webhook registration requires workflow activation
 
-## 1. OpenAI (ChatGPT) Setup
+## 1. OpenAI / GPT-4
 
 ### Get API Key:
-1. Go to https://platform.openai.com/api-keys
-2. Sign in or create account
-3. Click "Create new secret key"
-4. Copy the key (starts with `sk-`)
+1. Go to https://platform.openai.com/
+2. Create account or login
+3. Go to API Keys section
+4. Create new secret key
+5. Copy the key (starts with sk-...)
 
-### Add to n8n:
-1. Open n8n at http://localhost:5678
-2. Go to Settings → Credentials
-3. Click "Add Credential"
-4. Select "OpenAI"
-5. Enter your API key
-6. Test connection
+### Usage Limits:
+- Free tier: $5 credit (expires after 3 months)
+- Pay-as-you-go: $0.03 per 1K tokens (GPT-4)
+- Rate limits: 3 requests/minute (free tier)
+
+### N8N Configuration:
+```
+API Key: sk-your-key-here
+Model: gpt-4 or gpt-3.5-turbo
+Base URL: https://api.openai.com/v1 (default)
+```
+
+---
+
+## Groq (Free OpenAI-Compatible Alternative)
+
+### Get API Key:
+1. Go to https://console.groq.com
+2. Sign up for free account (Google/GitHub login available)
+3. Navigate to API Keys section
+4. Create new API key
+5. Copy the key (starts with gsk-...)
+
+### Usage Limits:
+- **Free tier**: Very generous limits
+- **Speed**: Extremely fast inference (great for demos)
+- **Models**: Llama 3, Mixtral, Gemma
+- **Rate limits**: Much higher than OpenAI free tier
+
+### N8N Configuration:
+```
+API Key: gsk-your-key-here
+Model: llama3-8b-8192 or mixtral-8x7b-32768
+Base URL: https://api.groq.com/openai/v1
+```
+
+### Recommended Models:
+- **llama3-8b-8192**: Fast, good for general tasks
+- **mixtral-8x7b-32768**: Better quality, larger context
+- **llama3-70b-8192**: Highest quality (slower)
+
+### Benefits for Development:
+- OpenAI-compatible format (easy migration later)
+- No credit card required
+- Very fast responses
+- Perfect for testing and development
 
 ## 2. HighLevel CRM Setup
 

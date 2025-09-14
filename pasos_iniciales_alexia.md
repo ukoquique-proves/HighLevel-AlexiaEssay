@@ -2,6 +2,8 @@
 
 Este documento describe los primeros pasos recomendados para arrancar el proyecto Alexia, siguiendo el plan y priorizando el uso de HighLevel y N8N.
 
+> Nota: El workflow está diseñado para ser extensible y soportar múltiples tipos de negocio (empezando por Fashion SME). Para detalles sobre el esquema de campos y la lógica de validación adaptable, ver la sección 'Business Vertical Extensibility' en [STRATEGY.md](./Proyecto-/STRATEGY.md).
+
 ---
 
 ## 1. Preparación del Entorno

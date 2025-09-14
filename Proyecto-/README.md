@@ -3,6 +3,8 @@
 ## Overview
 This project implements an automated CRM workflow system using n8n, ChatGPT, and HighLevel CRM. The system captures leads from forms, validates data, generates personalized advertisements using AI, and stores everything in a CRM system.
 
+For a detailed explanation of the business and technical strategy, see [STRATEGY.md](./STRATEGY.md).
+
 ## Project Architecture
 
 ### Core Workflow
@@ -26,25 +28,28 @@ This project was successfully uploaded to GitHub on 2025-09-08 using:
 - All workflow files, documentation, and configuration uploaded
 
 ### Directory Layout
+
+See also: [STRATEGY.md](./STRATEGY.md) for the project's strategic context and documentation map.
+
 ```
 PROYECTO/
 ├── README.md                           # This file - project overview
-├── CHANGELOG.md                        # Version history and changes
-├── FIRST_STEPS.md                      # Implementation guide
+├── STRATEGY.md                         # Strategic context and documentation map
+├── FIRST_STEPS.md                      # Getting started guide
+├── N8N_SETUP.md                        # N8N configuration and best practices
 ├── API_SETUP_GUIDE.md                  # API credentials and setup
-├── N8N_SETUP.md                        # n8n best practices and troubleshooting
-├── workflows/                          # n8n workflow definitions
-│   ├── crm-lead-workflow.json          # PRODUCTION WORKFLOW (current)
-│   ├── archive/                        # Historical versions
-│   │   ├── crm-lead-workflow-v1-minimal.json
-│   │   ├── crm-lead-workflow-v2-enhanced.json
-│   │   ├── crm-lead-workflow-v3-enhanced-clean.json
-│   │   └── crm-lead-workflow-v4-enhanced-fixed.json
-│   └── examples/                       # Reference/teaching workflows
-│       ├── crm-lead-workflow-mock-example.json
-│       └── crm-lead-workflow-simplified-example.json
-├── test-form.html                      # Test form for webhook validation
-└── simple-webhook-test.json           # Basic webhook test workflow
+├── HIGHLEVEL_SETUP_GUIDE.md            # HighLevel CRM configuration
+├── BUSINESS_STRATEGY_UPDATE.md         # Historical pivots and commercialization
+├── COMPETITIVE_ANALYSIS.md             # Market analysis and positioning
+├── PYTHON_INCLUSION.md                 # Python integration considerations
+├── CHANGELOG.md                        # Version history and updates
+├── test-form.html                      # Web form for testing workflows
+├── hector-test-dashboard.html          # Comprehensive API & N8N testing dashboard
+├── highlevel_token_manager.py          # HighLevel API token management
+└── workflows/
+    ├── crm-lead-processing-mock-highlevel.json  # Main workflow with extensible business logic
+    ├── examples/
+    └── archive/
 ```
 
 ## Current Implementation Status

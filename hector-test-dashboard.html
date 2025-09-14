@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hector's API & N8N Test Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .test-section { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #34495e; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        textarea { height: 80px; resize: vertical; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; }
+        .checkbox-group input[type="checkbox"] { width: auto; }
+        .btn { padding: 12px 24px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-right: 10px; }
+        .btn:hover { background: #2980b9; }
+        .btn-success { background: #27ae60; }
+        .btn-danger { background: #e74c3c; }
+        .response-area { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-top: 15px; }
+        .response-success { border-color: #28a745; background: #d4edda; }
+        .response-error { border-color: #dc3545; background: #f8d7da; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { padding: 12px 24px; background: #ecf0f1; border: none; cursor: pointer; border-radius: 4px 4px 0 0; margin-right: 2px; }
+        .tab.active { background: #3498db; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-success { background: #27ae60; }
+        .status-error { background: #e74c3c; }
+        .status-pending { background: #f39c12; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Hector's API & N8N Test Dashboard</h1>
+            <p>Comprehensive testing for all workflow inputs, outputs, and API integrations</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('phase1')">Phase 1: Environment & APIs</button>
+            <button class="tab" onclick="showTab('phase2')">Phase 2: Data Capture</button>
+            <button class="tab" onclick="showTab('phase3')">Phase 3: AI & Assets</button>
+            <button class="tab" onclick="showTab('monitoring')">Monitoring & Logs</button>
+        </div>
+
+        <!-- Phase 1: Environment & API Testing -->
+        <div id="phase1" class="tab-content active">
+            <div class="test-section">
+                <h2>🌐 Phase 1: Environment & API Connections</h2>
+                <p>Test N8N webhooks, API credentials, and basic connectivity</p>
+                
+                <div class="form-group">
+                    <label>N8N Webhook Endpoint</label>
+                    <input type="text" id="webhookUrl" value="http://localhost:5678/webhook/crm-lead-mock" placeholder="N8N webhook URL">
+                </div>
+
+                <div class="form-group">
+                    <button class="btn" onclick="testWebhookConnectivity()">Test Webhook Connectivity</button>
+                    <button class="btn btn-success" onclick="testGenericPayload()">Test Generic Business</button>
+                    <button class="btn btn-success" onclick="testFashionSMEPayload()">Test Fashion SME</button>
+                </div>
+
+                <div id="phase1Response" class="response-area" style="display: none;">
+                    <h4>Response:</h4>
+                    <pre id="phase1ResponseContent"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 2: Data Capture Testing -->
+        <div id="phase2" class="tab-content">
+            <div class="test-section">
+                <h2>📊 Phase 2: Data Capture & Validation</h2>
+                <p>Test custom payloads and validation logic</p>
+
+                <div class="form-group">
+                    <label>Business Type</label>
+                    <select id="businessType" onchange="toggleBusinessFields()">
+                        <option value="generic">Generic Business</option>
+                        <option value="fashion_sme">Fashion SME</option>
+                        <option value="custom">Custom (Manual JSON)</option>
+                    </select>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="name" value="Maria Rodriguez" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" value="maria@fashionstore.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input type="text" id="phone" value="+57 300 123 4567" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Service *</label>
+                        <input type="text" id="service" value="marketing" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" id="company" value="Boutique Maria">
+                    </div>
+                    <div class="form-group">
+                        <label>Budget</label>
+                        <input type="text" id="budget" value="500-1000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="message" placeholder="Describe your needs...">Necesito ayuda con marketing digital para mi tienda de ropa femenina</textarea>
+                </div>
+
+                <!-- Fashion SME Specific Fields -->
+                <div id="fashionFields" style="display: none;">
+                    <h3>Fashion SME Specific Fields</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Fashion Sector *</label>
+                            <select id="fashionSector">
+                                <option value="moda-femenina">Moda Femenina</option>
+                                <option value="moda-masculina">Moda Masculina</option>
+                                <option value="moda-infantil">Moda Infantil</option>
+                                <option value="accesorios">Accesorios</option>
+                                <option value="calzado">Calzado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Country</label>
+                            <input type="text" id="country" value="colombia">
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" id="city" value="Bogotá">
+                        </div>
+                        <div class="form-group">
+                            <label>Monthly Sales</label>
+                            <input type="text" id="monthlySales" value="1000-5000">
+                        </div>
+                        <div class="form-group">
+                            <label>Marketing Budget</label>
+                            <input type="text" id="marketingBudget" value="500-1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Objective *</label>
+                            <select id="objective">
+                                <option value="aumentar-ventas">Aumentar Ventas</option>
+                                <option value="captar-leads">Captar Leads</option>
+                                <option value="lanzar-producto">Lanzar Producto</option>
+                                <option value="fidelizar-clientes">Fidelizar Clientes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Channels (comma-separated)</label>
+                        <input type="text" id="currentChannels" value="instagram,facebook,tienda-fisica">
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="hasProductImages" checked>
+                            <label for="hasProductImages">Has Product Images</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Brand Differentiation</label>
+                        <textarea id="brandDifferentiation">Ropa hecha a mano con materiales ecológicos</textarea>
+                    </div>
+                </div>
+
+                <!-- Custom JSON Input -->
+                <div id="customJsonField" style="display: none;">
+                    <div class="form-group">
+                        <label>Custom JSON Payload</label>
+                        <textarea id="customJson" rows="10" placeholder="Enter your custom JSON payload here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn" onclick="testCustomPayload()">Test Custom Payload</button>
+                    <button class="btn btn-danger" onclick="testInvalidPayload()">Test Invalid Data</button>
+                </div>
+
+                <div id="phase2Response" class="response-area" style="display: none;">
+                    <h4>Response:</h4>
+                    <pre id="phase2ResponseContent"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 3: AI & Assets Testing -->
+        <div id="phase3" class="tab-content">
+            <div class="test-section">
+                <h2>🤖 Phase 3: AI Integration & Asset Generation</h2>
+                <p>Test AI API connections and content generation (Future Implementation)</p>
+                
+                <div class="form-group">
+                    <label>AI Service</label>
+                    <select id="aiService">
+                        <option value="openai">OpenAI GPT-4</option>
+                        <option value="stability">Stability AI</option>
+                        <option value="mock">Mock AI (Current)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn" onclick="testAIConnection()">Test AI Connection</button>
+                    <button class="btn" onclick="generateMockContent()">Generate Mock Content</button>
+                </div>
+
+                <div id="phase3Response" class="response-area" style="display: none;">
+                    <h4>AI Response:</h4>
+                    <pre id="phase3ResponseContent"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring & Logs -->
+        <div id="monitoring" class="tab-content">
+            <div class="test-section">
+                <h2>📊 Monitoring & System Status</h2>
+                
+                <div class="form-group">
+                    <h3>System Status</h3>
+                    <p><span class="status-indicator status-success"></span>N8N Service: Running</p>
+                    <p><span class="status-indicator status-pending"></span>OpenAI API: Not Configured</p>
+                    <p><span class="status-indicator status-pending"></span>Meta Ads API: Not Configured</p>
+                    <p><span class="status-indicator status-pending"></span>Payment APIs: Not Configured</p>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn" onclick="checkSystemStatus()">Refresh Status</button>
+                    <button class="btn" onclick="viewLogs()">View N8N Logs</button>
+                </div>
+
+                <div id="monitoringResponse" class="response-area" style="display: none;">
+                    <h4>System Information:</h4>
+                    <pre id="monitoringResponseContent"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Toggle business-specific fields
+        function toggleBusinessFields() {
+            const businessType = document.getElementById('businessType').value;
+            const fashionFields = document.getElementById('fashionFields');
+            const customJsonField = document.getElementById('customJsonField');
+            
+            fashionFields.style.display = businessType === 'fashion_sme' ? 'block' : 'none';
+            customJsonField.style.display = businessType === 'custom' ? 'block' : 'none';
+        }
+
+        // API Testing Functions
+        async function makeRequest(url, payload) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const text = await response.text();
+                if (!response.ok) {
+                    // Handle empty response
+                    if (!text || text.trim() === '') {
+                        return { success: false, error: 'No response body. The workflow likely failed validation and returned an empty response.', status: response.status };
+                    }
+                    // Try to parse as JSON, but fall back to raw text if it fails
+                    try {
+                        const errorData = JSON.parse(text);
+                        return { success: false, data: errorData, status: response.status };
+                    } catch (e) {
+                        return { success: false, error: 'Server returned non-JSON error response', responseText: text, status: response.status };
+                    }
+                }
+
+                // Handle empty success response
+                if (!text || text.trim() === '') {
+                    return { success: true, data: null, message: 'No response body, but request succeeded.', status: response.status };
+                }
+                const data = JSON.parse(text);
+                return { success: true, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        function displayResponse(responseId, contentId, result) {
+            const responseDiv = document.getElementById(responseId);
+            const contentPre = document.getElementById(contentId);
+            
+            responseDiv.style.display = 'block';
+            responseDiv.className = `response-area ${result.success ? 'response-success' : 'response-error'}`;
+            contentPre.textContent = JSON.stringify(result, null, 2);
+        }
+
+        // Phase 1 Tests
+        async function testWebhookConnectivity() {
+            const url = document.getElementById('webhookUrl').value;
+            const payload = {
+                businessType: 'generic',
+                name: 'Test User',
+                email: 'test@example.com',
+                phone: '+1 555 000 0000',
+                service: 'consulting', // Use a valid service for the test
+                message: 'Testing webhook connectivity'
+            };
+            const result = await makeRequest(url, payload);
+            displayResponse('phase1Response', 'phase1ResponseContent', result);
+        }
+
+        async function testGenericPayload() {
+            const url = document.getElementById('webhookUrl').value;
+            const payload = {
+                businessType: 'generic',
+                name: 'John Doe',
+                email: 'john@example.com',
+                phone: '+1 555 123 4567',
+                service: 'web-design',
+                company: 'Example Corp',
+                budget: '1000-5000',
+                message: 'Need a new website for our business'
+            };
+            const result = await makeRequest(url, payload);
+            displayResponse('phase1Response', 'phase1ResponseContent', result);
+        }
+
+        async function testFashionSMEPayload() {
+            const url = document.getElementById('webhookUrl').value;
+            const payload = {
+                businessType: 'fashion_sme',
+                name: 'Maria Rodriguez',
+                email: 'maria@fashionstore.com',
+                phone: '+57 300 123 4567',
+                service: 'marketing',
+                company: 'Boutique Maria',
+                budget: '500-1000',
+                message: 'Necesito ayuda con marketing digital para mi tienda de ropa femenina',
+                fashionSector: 'moda-femenina',
+                country: 'colombia',
+                city: 'Bogotá',
+                currentChannels: ['instagram', 'facebook', 'tienda-fisica'],
+                monthlySales: '1000-5000',
+                marketingBudget: '500-1000',
+                hasProductImages: true,
+                brandDifferentiation: 'Ropa hecha a mano con materiales ecológicos',
+                objective: 'aumentar-ventas'
+            };
+            const result = await makeRequest(url, payload);
+            displayResponse('phase1Response', 'phase1ResponseContent', result);
+        }
+
+        // Phase 2 Tests
+        async function testCustomPayload() {
+            const url = document.getElementById('webhookUrl').value;
+            const businessType = document.getElementById('businessType').value;
+            
+            let payload;
+            if (businessType === 'custom') {
+                try {
+                    payload = JSON.parse(document.getElementById('customJson').value);
+                } catch (e) {
+                    displayResponse('phase2Response', 'phase2ResponseContent', { success: false, error: 'Invalid JSON' });
+                    return;
+                }
+            } else {
+                payload = {
+                    businessType: businessType,
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    service: document.getElementById('service').value,
+                    company: document.getElementById('company').value,
+                    budget: document.getElementById('budget').value,
+                    message: document.getElementById('message').value
+                };
+
+                if (businessType === 'fashion_sme') {
+                    payload.fashionSector = document.getElementById('fashionSector').value;
+                    payload.country = document.getElementById('country').value;
+                    payload.city = document.getElementById('city').value;
+                    payload.currentChannels = document.getElementById('currentChannels').value.split(',').map(s => s.trim());
+                    payload.monthlySales = document.getElementById('monthlySales').value;
+                    payload.marketingBudget = document.getElementById('marketingBudget').value;
+                    payload.hasProductImages = document.getElementById('hasProductImages').checked;
+                    payload.brandDifferentiation = document.getElementById('brandDifferentiation').value;
+                    payload.objective = document.getElementById('objective').value;
+                }
+            }
+
+            const result = await makeRequest(url, payload);
+            displayResponse('phase2Response', 'phase2ResponseContent', result);
+        }
+
+        async function testInvalidPayload() {
+            const url = document.getElementById('webhookUrl').value;
+            const payload = {
+                businessType: 'fashion_sme',
+                name: '', // Missing required field
+                email: 'invalid-email', // Invalid format
+                phone: '123', // Too short
+                service: 'invalid-service', // Invalid service
+                fashionSector: '', // Missing required field for fashion SME
+                objective: '' // Missing required field for fashion SME
+            };
+            const result = await makeRequest(url, payload);
+            displayResponse('phase2Response', 'phase2ResponseContent', result);
+        }
+
+        // Phase 3 Tests
+        async function testAIConnection() {
+            displayResponse('phase3Response', 'phase3ResponseContent', { 
+                success: false, 
+                message: 'AI APIs not yet configured. This will be implemented in future phases.' 
+            });
+        }
+
+        async function generateMockContent() {
+            const mockContent = {
+                success: true,
+                message: 'Mock AI content generated',
+                content: {
+                    marketAnalysis: 'Fashion market in Colombia shows strong growth in sustainable clothing...',
+                    buyerPersona: 'Maria, 28-35, eco-conscious professional woman...',
+                    adCopy: '🌿 Discover sustainable fashion that makes a statement! Handcrafted with love...'
+                }
+            };
+            displayResponse('phase3Response', 'phase3ResponseContent', mockContent);
+        }
+
+        // Monitoring
+        async function checkSystemStatus() {
+            const status = {
+                timestamp: new Date().toISOString(),
+                n8n: { status: 'running', port: 5678 },
+                apis: {
+                    openai: 'not_configured',
+                    meta_ads: 'not_configured',
+                    payments: 'not_configured'
+                }
+            };
+            displayResponse('monitoringResponse', 'monitoringResponseContent', status);
+        }
+
+        async function viewLogs() {
+            displayResponse('monitoringResponse', 'monitoringResponseContent', { 
+                message: 'Log viewing functionality will be implemented. Check n8n.log file manually for now.' 
+            });
+        }
+
+        // Initialize
+        toggleBusinessFields();
+    </script>
+</body>
+</html>

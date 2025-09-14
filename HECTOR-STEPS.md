@@ -313,29 +313,53 @@ const validObjectives = ['aumentar-ventas', 'captar-leads', 'lanzar-producto', '
 ]
 ```
 
----
+### Week 1: Testing and Validation
 
-## **🚀 Your Immediate Next Steps - Updated**
+### Current Status
+- ✅ N8N workflow is active and tested
+- ✅ Mock HighLevel integration working
+- ✅ Enhanced validation logic implemented
+- ✅ Fashion SME field adaptation completed
+- ✅ Web-based test dashboard created
 
-### **Step 1: Test Current Workflow (Today)**
+### Testing with Hector's Test Dashboard
+
+**Primary Testing Method:**
+Use the web-based test dashboard: `hector-test-dashboard.html`
+
+**Features:**
+- **Phase 1 Testing**: Environment & API connections
+- **Phase 2 Testing**: Data capture & validation for all business types
+- **Phase 3 Testing**: AI integration & asset generation (mock)
+- **Monitoring**: System status and health checks
+- **No Console Required**: All testing through web interface
+
+**How to Use:**
+1. Open `hector-test-dashboard.html` in your browser
+2. Select the appropriate phase tab
+3. Configure test parameters
+4. Execute tests and view results in real-time
+
+### Command Line Testing (Alternative)
+
+**Test Generic Business Lead:**
 ```bash
-# Test the existing webhook
-curl -v -X POST "http://localhost:5678/webhook/crm-lead-mock" \
+curl -X POST "http://localhost:5678/webhook/crm-lead-mock" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Maria Rodriguez",
-    "email": "maria@fashionstore.com",
-    "phone": "+57 300 123 4567",
-    "service": "marketing",
-    "company": "Boutique Maria",
-    "budget": "500-1000",
-    "message": "Necesito ayuda con marketing digital para mi tienda de ropa femenina"
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "+1 555 123 4567",
+    "service": "web-design",
+    "company": "Example Corp",
+    "budget": "1000-5000",
+    "message": "Need a new website for our business"
   }'
 ```
 
 ### **Step 2: Create Fashion SME Version (This Week)**
 1. **Copy the existing workflow** as `alexia-fashion-workflow.json`
-2. **Modify the validation node** with fashion SME fields
+{{ ... }}
 3. **Update the ad generation** with fashion-specific templates
 4. **Test with fashion SME data**
 
