@@ -1,0 +1,114 @@
+{
+  "name": "CRM Lead Processing - Mock HighLevel Integration",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-lead-mock",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "webhookId": "crm-lead-mock"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced data validation for Phase 3 Mock\nconst data = items[0].json;\nconsole.log('Received data:', JSON.stringify(data, null, 2));\n\nconst errors = [];\n\n// Validate required fields with better data access\nconst name = (data.name || data.body?.name || '').toString().trim();\nconst email = (data.email || data.body?.email || '').toString().trim().toLowerCase();\nconst phone = (data.phone || data.body?.phone || '').toString().trim();\nconst service = (data.service || data.body?.service || '').toString().trim();\nconst company = (data.company || data.body?.company || '').toString().trim();\nconst budget = (data.budget || data.body?.budget || '').toString();\n\nconsole.log('Parsed fields:', { name, email, phone, service, company, budget });\n\nif (!name) errors.push('Name is required');\nif (!email) errors.push('Email is required');\nif (!phone) errors.push('Phone is required');\nif (!service) errors.push('Service is required');\n\n// Email validation\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (email && !emailRegex.test(email)) {\n  errors.push('Invalid email format');\n}\n\n// Phone validation (basic)\nconst phoneClean = phone.replace(/[\\s\\-\\(\\)]/g, '');\nif (phone && phoneClean.length < 10) {\n  errors.push('Phone number too short');\n}\n\n// Service validation\nconst validServices = ['web-design', 'marketing', 'consulting', 'seo', 'social-media'];\nif (service && !validServices.includes(service.toLowerCase())) {\n  errors.push('Invalid service type');\n}\n\nif (errors.length > 0) {\n  throw new Error('Validation failed: ' + errors.join(', '));\n}\n\n// Clean and structure data for next node\nconst cleanData = {\n  name: name,\n  email: email,\n  phone: phoneClean,\n  service: service.toLowerCase(),\n  company: company,\n  budget: budget,\n  message: (data.message || data.body?.message || '').toString().trim(),\n  source: 'web-form',\n  timestamp: new Date().toISOString()\n};\n\nconsole.log('Clean data output:', JSON.stringify(cleanData, null, 2));\nreturn [{ json: cleanData }];"
+      },
+      "id": "validation-node",
+      "name": "Enhanced Data Validation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mock HighLevel CRM Integration\nconst data = items[0].json;\nconsole.log('Mock CRM received data:', JSON.stringify(data, null, 2));\n\n// Enhanced ad templates for HighLevel context\nconst adTemplates = {\n  'web-design': [\n    `🚀 Transform ${data.company || data.name}'s online presence! Professional web design that converts visitors into customers. Get a stunning website that reflects your brand's excellence and drives measurable results.`,\n    `💻 Ready to stand out online? Custom web design tailored for ${data.company || data.name}'s success. Modern, responsive, and optimized for lead generation and customer conversion.`\n  ],\n  'marketing': [\n    `📈 Boost ${data.company || data.name}'s business growth! Strategic marketing solutions that drive real results. Let's amplify your brand's reach and generate qualified leads for your business.`,\n    `🎯 Target success with precision! Custom marketing strategies for ${data.company || data.name}. Reach the right audience at the right time with measurable ROI.`\n  ],\n  'consulting': [\n    `🎯 Expert guidance for ${data.company || data.name}'s success! Professional consulting to unlock your business potential. Strategic insights that drive growth and measurable business outcomes.`,\n    `💼 Transform ${data.company || data.name}'s business strategy! Consulting services tailored for your unique needs. Expert advice with guaranteed measurable results.`\n  ],\n  'seo': [\n    `🔍 Dominate search results for ${data.company || data.name}! SEO strategies that drive organic traffic and qualified leads. Get found by customers actively searching for your services.`,\n    `📊 SEO that moves the needle! Proven strategies to rank ${data.company || data.name} higher in search results. Drive qualified traffic and generate leads 24/7.`\n  ],\n  'social-media': [\n    `📱 Amplify ${data.company || data.name}'s social presence! Social media strategies that build brand awareness and generate leads. Connect with your ideal customers where they spend time.`,\n    `🎯 Social media that converts! Strategic campaigns for ${data.company || data.name} that build communities and drive measurable business results.`\n  ]\n};\n\n// Select appropriate template\nconst serviceKey = data.service.toLowerCase();\nconst templates = adTemplates[serviceKey] || adTemplates['consulting'];\n\n// Generate personalized ad\nconst selectedTemplate = templates[Math.floor(Math.random() * templates.length)];\nlet personalizedAd = selectedTemplate;\n\n// Add budget context if provided\nif (data.budget && data.budget !== 'not-specified') {\n  personalizedAd += ` Solutions tailored to your ${data.budget} investment range.`;\n}\n\n// Add company context\nif (data.company) {\n  personalizedAd += ` Perfect for ${data.company}'s growth objectives.`;\n}\n\n// Mock HighLevel API responses\nconst mockContactId = 'mock_contact_' + Math.random().toString(36).substr(2, 9);\nconst mockOpportunityId = 'mock_opportunity_' + Math.random().toString(36).substr(2, 9);\n\n// Simulate HighLevel contact creation\nconst mockContactResponse = {\n  id: mockContactId,\n  firstName: data.name,\n  email: data.email,\n  phone: data.phone,\n  companyName: data.company,\n  tags: ['web-form', data.service],\n  customField: {\n    budget: data.budget,\n    service: data.service,\n    source: data.source,\n    generated_ad: personalizedAd\n  },\n  dateAdded: new Date().toISOString()\n};\n\n// Simulate HighLevel opportunity creation\nconst mockOpportunityResponse = {\n  id: mockOpportunityId,\n  name: 'Lead: ' + data.name + ' - ' + data.service,\n  contactId: mockContactId,\n  value: 2500,\n  stage: 'New Lead',\n  notes: 'Generated Ad: ' + personalizedAd + '\\n\\nBudget: ' + data.budget + '\\n\\nMessage: ' + data.message,\n  tags: ['web-form', data.service],\n  dateCreated: new Date().toISOString()\n};\n\n// Return complete response\nconst result = {\n  success: true,\n  message: 'Lead processed successfully and added to CRM (mock integration)!',\n  leadData: data,\n  generatedAd: personalizedAd,\n  crmContactId: mockContactId,\n  crmOpportunityId: mockOpportunityId,\n  crmContactResponse: mockContactResponse,\n  crmOpportunityResponse: mockOpportunityResponse,\n  processedAt: new Date().toISOString(),\n  note: 'This is a mock integration. Replace with real HighLevel API when ready.'\n};\n\nconsole.log('Mock CRM output:', JSON.stringify(result, null, 2));\nreturn [{ json: result }];"
+      },
+      "id": "mock-crm-node",
+      "name": "Mock HighLevel Integration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [600, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": false,
+          "error": "={{ $json.error.message }}",
+          "message": "Failed to process lead. Please check your information.",
+          "timestamp": "={{ new Date().toISOString() }}"
+        },
+        "options": {}
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [600, 200]
+    }
+  ],
+  "connections": {
+    "Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Enhanced Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enhanced Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Mock HighLevel Integration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock HighLevel Integration": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

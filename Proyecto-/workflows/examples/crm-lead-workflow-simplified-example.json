@@ -1,0 +1,87 @@
+{
+  "name": "CRM Lead Processing Workflow Simplified",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-lead",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-trigger",
+      "name": "Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "crm-lead-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Validate incoming form data\nconst requiredFields = ['name', 'email', 'phone', 'service'];\nconst data = items[0].json;\n\n// Check required fields\nfor (const field of requiredFields) {\n  if (!data[field] || data[field].trim() === '') {\n    throw new Error('Missing required field: ' + field);\n  }\n}\n\n// Validate email format\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(data.email)) {\n  throw new Error('Invalid email format');\n}\n\n// Validate phone format (basic)\nconst phoneRegex = /^[\\+]?[1-9][\\d]{1,14}$/;\nif (!phoneRegex.test(data.phone.replace(/[\\s\\-\\(\\)]/g, ''))) {\n  throw new Error('Invalid phone format');\n}\n\n// Clean and structure data\nconst cleanData = {\n  name: data.name.trim(),\n  email: data.email.trim().toLowerCase(),\n  phone: data.phone.replace(/[\\s\\-\\(\\)]/g, ''),\n  service: data.service.trim(),\n  company: data.company ? data.company.trim() : '',\n  budget: data.budget || '',\n  message: data.message || '',\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: cleanData }];"
+      },
+      "id": "data-validation",
+      "name": "Data Validation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": true,
+          "message": "Lead processed successfully"
+        }
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": false,
+          "error": "={{$json.error.message}}",
+          "message": "Failed to process lead"
+        }
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    }
+  ],
+  "connections": {
+    "Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": ["crm", "leads", "automation"],
+  "triggerCount": 0,
+  "updatedAt": "2025-09-05T02:23:58.000Z",
+  "versionId": "2"
+}

@@ -1,0 +1,147 @@
+﻿﻿
+Plan de trabajo – Proyecto Alexia – By Alianza Expertos
+1. Objetivo y Alcance del Proyecto
+
+Objetivo: Automatizar la estrategia de marketing digital 360 de PYMES del sector moda en Latinoamerica utilizando HighLevel como base operativa y agentes de IA conectados vía N8N, con el fin de aumentar sus ventas en al menos un 30% mensual sin necesidad de personal especializado.
+Alcance: Desde la captura de información inicial del empresario hasta la publicación automatizada de campañas, generación de leads, remarketing y cierre de ventas, con una arquitectura modular que permite replicar el sistema a múltiples clientes de forma estandarizada.
+
+2. Introducción y Contexto General
+La gran mayoría de las PYMES de moda en Latinoamerica carecen de recursos para implementar estrategias de marketing digitales efectivas. Estas empresas dependen de ventas presenciales, redes sociales sin automatización y esfuerzos manuales que limitan su crecimiento.
+El proyecto "Alianza Expertos" propone un sistema autónomo que convierte las ideas del empresario en una estrategia digital ejecutable mediante IA, sin requerir conocimientos técnicos ni personal especializado. La validación inicial se realizará con tres PYMES reales como pilotos.
+
+3. Componentes Técnicos del Proyecto
+
+- HighLevel (CRM, workflows, landing pages, campañas, pagos)
+- N8N (automatización y orquestación entre plataformas)
+- OpenAI / GPT-4 (generación de contenido estratégico)
+- Banana / DALL·E (imágenes y recursos visuales)
+- Meta Ads API (publicación de campañas publicitarias)
+- ePayco / Stripe (procesamiento de pagos)
+
+4. Flujo General del Sistema
+1. Usuario completa un wizard inteligente con IA.
+2. N8N interpreta los datos, genera activos de marketing con agentes IA.
+3. Cliente revisa 3 propuestas y aprueba.
+4. N8N publica automáticamente en Meta Ads.
+5. HL captura leads, envía mensajes y automatiza el seguimiento.
+6. IA monitorea KPIs y sugiere acciones en el panel /mis-resultados.
+
+5. Roles y Responsabilidades del Equipo
+- Desarrollador N8N: orquestación de flujos, integración con HL y Meta.
+- Especialista IA: diseño de prompts y afinación de respuestas generativas.
+- UX/UI: construcción del wizard y páginas de usuario.
+- Customer Success: validación con PYMES piloto, entrenamiento y feedback.
+- Especialista CRM: Configuración HL
+
+6. Actividades a Desarrollar por Fases y Herramientas a Implementar
+Fase 1: Preparación del Entorno y Componentes
+    • Definir snapshot base en HighLevel.
+    • Crear flujo de onboarding en HL + Google Form / Wizard Web.
+    • Configurar entorno N8N (nube o local).
+    • Crear cuentas OpenAI, Stability AI, Meta Developers, ePayco.
+
+Fase 2: Captura de Estrategia Empresarial
+    • Diseñar formulario inteligente (Wizard + IA GPT-4).
+    • Agente interpreta la estrategia del cliente.
+    • N8N almacena los datos y activa otros procesos.
+
+Fase 3: Generación de Activos y Análisis
+    • Análisis de mercado: IA + scraping (Google Trends, Meta Library).
+    • Buyer persona: IA generativa.
+    • Copywriting publicitario: IA con 3 variantes.
+    • Creatividades: IA para imagen y video.
+
+Fase 4: Aprobación y Publicación
+    • Agente IA presenta las 3 propuestas al cliente.
+    • Cliente aprueba o edita antes de publicar.
+    • N8N publica anuncios con Meta API.
+
+Fase 5: Seguimiento y Conversión
+    • HL captura leads + workflows automatizados.
+    • Agente IA adapta mensajes de seguimiento.
+    • Integración de pagos: ePayco / Wompi.
+
+Fase 6: Fidelización y Optimización
+    • Agente IA lanza mensajes de posventa, reviews, recompra.
+    • N8N monitorea KPIs (ventas, clics, respuestas).
+    • Reporte mensual automatizado al empresario.
+
+Fase 7: Ruta de Activación y Éxito del Cliente
+    • Creación de panel /mis-resultados con KPIs, recomendaciones de IA.
+    • Agente de IA interno que guía al cliente con sugerencias semanales.
+    • Generación de tareas simples automatizadas para el usuario (ej. publicar historia, enviar cupón).
+
+7. Cronograma Propuesto
+
+Semana
+
+Actividades Clave
+1
+Configuración HL, entorno N8N, APIs externas
+2
+Desarrollo Wizard IA + pruebas de prompts y scraping
+3
+Activación generador de activos IA + flujos de HL
+4
+Flujo de aprobación + publicación + automatización de ventas
+5
+Implementación del módulo /mis-resultados y asistente IA de acompañamiento
+
+8. Páginas de Usuario Integradas con Agentes IA
+    1. /wizard-estrategia
+        ◦ Formulario inteligente (IA + campos guiados)
+        ◦ Salida: buyer persona + diferencial + objetivo
+    2. /propuestas-marketing
+        ◦ Visualización de 3 propuestas de campaña (copy + imagen + canal)
+        ◦ Botones: Aprobar / Ajustar / Rechazar
+    3. /mis-resultados
+        ◦ Panel de resultados automatizados
+        ◦ Acceso a reportes, KPIs y sugerencias IA para el mes siguiente
+    4. /soporte-inteligente
+        ◦ Agente conversacional para resolver dudas 24/7
+
+9. Prompts Requeridos por Tipo de Agente IA
+Agente
+Prompt base (adaptable)
+
+Estrategia Comercial
+"Actúa como consultor. Mi empresa vende [producto] en [ciudad] y quiere [objetivo]..."
+
+Análisis de mercado
+"Resúmen de tendencias recientes para [nicho] en [país/ciudad] en redes y e-commerce"
+
+Buyer Persona
+"Define mi cliente ideal para [producto], con estilo [x], precio [y], canal [z]..."
+
+Copywriting Publicitario
+"Genera 3 anuncios atractivos para vender [producto] en Instagram usando tono [divertido, premium...]"
+
+Creatividad Visual
+"Imagen estilo [tropical/kawaii/minimalista] de [producto] en fondo neutro, formato 1:1..."
+
+Remarketing y Seguimiento
+"Mensaje de WhatsApp para cliente que mostró interés pero no compró"
+
+Reporte IA mensual
+"Resumen de campaña + recomendación de optimización para el próximo mes"
+
+
+10. Arquitectura Visual y Orquestación
+
+flowchart TD
+A[Usuario completa Wizard Estrategia] --> B[Agente IA genera buyer persona y prompts]
+B --> C[N8N genera: Copy + Imagen + Video + Análisis]
+C --> D[Página de Propuestas IA]
+D -->|Aprobación| E[Meta Ads API via N8N]
+E --> F[HighLevel captura leads]
+F --> G[Workflows de seguimiento + WhatsApp]
+G --> H[ePayco/Wompi: Pago]
+H --> I[Workflows posventa + Referidos]
+I --> J[Agente IA genera reporte mensual]
+J --> K[Panel /mis-resultados y asistente IA de acompañamiento]
+
+Explicación:
+    • Frontend (Next.js o HL embebido): para formularios y visualización de IA.
+    • N8N: conecta HL + Meta API + herramientas IA + pagos.
+    • HL: workflows, comunicaciones, CRM, automatización.
+    • Agentes IA: generan contenido, interpretan estrategias, optimizan mensajes y acompañan al usuario.

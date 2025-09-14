@@ -1,0 +1,94 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "448182fb-aa4c-438d-931d-2a38f4043744",
+      "name": "Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "webhookId": "crm-lead-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Validate incoming form data\nconst requiredFields = ['name', 'email', 'phone', 'service'];\nconst data = items[0].json;\nconst response = {};\n\nconst name = (data.name || '').trim();\nconst email = (data.email || '').trim().toLowerCase();\n\nif (!name || !email) {\n  response.success = false;\n  response.message = 'Validation failed: Name and email are required.';\n  response.error = 'Missing required fields.';\n} else {\n  response.success = true;\n  response.message = 'Lead received successfully!';\n  response.generatedAd = `This is a test ad for ${name}.`;\n  response.contactId = \"test-contact-123\";\n  response.opportunityId = \"test-opp-456\";\n}\n\nreturn [{ json: response }];"
+      },
+      "id": "6a7a1ef2-be5a-4910-b62a-7f9b5339118a",
+      "name": "Data Validation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [224, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": true,
+          "message": "Lead processed successfully"
+        },
+        "options": {}
+      },
+      "id": "279532dc-fe67-477f-8a37-472a4f1cfd84",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [448, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": false,
+          "error": "={{$json.error.message}}",
+          "message": "Failed to process lead"
+        },
+        "options": {}
+      },
+      "id": "b7bc4f98-1632-4707-a0a9-e6547e669545",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [448, 208]
+    }
+  ],
+  "connections": {
+    "Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

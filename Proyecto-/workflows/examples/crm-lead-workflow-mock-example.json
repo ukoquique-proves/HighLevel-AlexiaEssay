@@ -1,0 +1,195 @@
+{
+  "name": "CRM Lead Processing Workflow (Mock APIs)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-lead-mock",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "crm-lead-webhook-mock"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Validate incoming form data\nconst requiredFields = ['name', 'email', 'phone', 'service'];\nconst data = items[0].json;\n\n// Check required fields\nfor (const field of requiredFields) {\n  if (!data[field] || data[field].trim() === '') {\n    throw new Error(`Missing required field: ${field}`);\n  }\n}\n\n// Validate email format\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(data.email)) {\n  throw new Error('Invalid email format');\n}\n\n// Validate phone format (basic)\nconst phoneRegex = /^[\\+]?[1-9][\\d]{1,14}$/;\nif (!phoneRegex.test(data.phone.replace(/[\\s\\-\\(\\)]/g, ''))) {\n  throw new Error('Invalid phone format');\n}\n\n// Clean and structure data\nconst cleanData = {\n  name: data.name.trim(),\n  email: data.email.trim().toLowerCase(),\n  phone: data.phone.replace(/[\\s\\-\\(\\)]/g, ''),\n  service: data.service.trim(),\n  company: data.company ? data.company.trim() : '',\n  budget: data.budget || '',\n  message: data.message || '',\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: cleanData }];"
+      },
+      "id": "data-validation",
+      "name": "Data Validation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyContentType": "json",
+        "jsonBody": "{\n  \"model\": \"gpt-3.5-turbo-mock\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"message\": \"You are a marketing expert creating personalized advertisement copy. Create compelling, professional ad content based on the lead information provided.\"\n    },\n    {\n      \"role\": \"user\",\n      \"message\": \"Create a personalized advertisement for:\\nName: {{$json.name}}\\nService Interest: {{$json.service}}\\nCompany: {{$json.company}}\\nBudget: {{$json.budget}}\\nMessage: {{$json.message}}\\n\\nCreate a compelling 2-3 sentence ad that addresses their specific needs and interests. Make it professional and engaging.\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"max_tokens\": 150\n}",
+        "options": {}
+      },
+      "id": "mock-ai-generation",
+      "name": "Generate Ad with Mock AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3001/contacts",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyContentType": "json",
+        "jsonBody": "{\n  \"firstName\": \"{{$node['Data Validation'].json.name.split(' ')[0]}}\",\n  \"lastName\": \"{{$node['Data Validation'].json.name.split(' ').slice(1).join(' ')}}\",\n  \"email\": \"{{$node['Data Validation'].json.email}}\",\n  \"phone\": \"{{$node['Data Validation'].json.phone}}\",\n  \"companyName\": \"{{$node['Data Validation'].json.company}}\",\n  \"customFields\": {\n    \"service_interest\": \"{{$node['Data Validation'].json.service}}\",\n    \"budget\": \"{{$node['Data Validation'].json.budget}}\",\n    \"generated_ad\": \"{{$node['Generate Ad with Mock AI'].json.choices[0].message.content}}\",\n    \"lead_source\": \"n8n_automation_mock\",\n    \"submission_date\": \"{{$node['Data Validation'].json.timestamp}}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "mock-crm-contact",
+      "name": "Create Mock CRM Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3001/opportunities",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyContentType": "json",
+        "jsonBody": "{\n  \"contactId\": \"{{$node['Create Mock CRM Contact'].json.contact.id}}\",\n  \"title\": \"New Lead - {{$node['Data Validation'].json.service}}\",\n  \"status\": \"open\",\n  \"monetaryValue\": {{$node['Data Validation'].json.budget ? parseInt($node['Data Validation'].json.budget.replace(/[^0-9]/g, '')) || 0 : 0}},\n  \"source\": \"n8n_automation_mock\",\n  \"notes\": \"Generated Ad: {{$node['Generate Ad with Mock AI'].json.choices[0].message.content}}\\n\\nOriginal Message: {{$node['Data Validation'].json.message}}\"\n}",
+        "options": {}
+      },
+      "id": "mock-crm-opportunity",
+      "name": "Create Mock Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Lead processed successfully with mock APIs\",\n  \"contactId\": \"{{$node['Create Mock CRM Contact'].json.contact.id}}\",\n  \"opportunityId\": \"{{$node['Create Mock Opportunity'].json.opportunity.id}}\",\n  \"generatedAd\": \"{{$node['Generate Ad with Mock AI'].json.choices[0].message.content}}\",\n  \"testMode\": true\n}"
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"error\": \"{{$json.error.message}}\",\n  \"message\": \"Failed to process lead\",\n  \"testMode\": true\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 500]
+    }
+  ],
+  "connections": {
+    "Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Generate Ad with Mock AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Ad with Mock AI": {
+      "main": [
+        [
+          {
+            "node": "Create Mock CRM Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Mock CRM Contact": {
+      "main": [
+        [
+          {
+            "node": "Create Mock Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Mock Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": {
+      "errorWorkflow": "error-response"
+    }
+  },
+  "staticData": null,
+  "tags": ["crm", "leads", "automation", "mock", "testing"],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-03T05:37:43.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,121 @@
+{
+  "name": "CRM Lead Processing with Mock AI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "webhookId": "crm-lead-enhanced"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced data validation with phone and service\nconst data = items[0].json;\nconst errors = [];\n\n// Validate required fields\nconst name = (data.name || '').trim();\nconst email = (data.email || '').trim().toLowerCase();\nconst phone = (data.phone || '').trim();\nconst service = (data.service || '').trim();\n\nif (!name) errors.push('Name is required');\nif (!email) errors.push('Email is required');\nif (!phone) errors.push('Phone is required');\nif (!service) errors.push('Service is required');\n\n// Email validation\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (email && !emailRegex.test(email)) {\n  errors.push('Invalid email format');\n}\n\n// Phone validation (basic)\nconst phoneClean = phone.replace(/[\\s\\-\\(\\)]/g, '');\nif (phone && phoneClean.length < 10) {\n  errors.push('Phone number too short');\n}\n\nif (errors.length > 0) {\n  throw new Error('Validation failed: ' + errors.join(', '));\n}\n\n// Clean and structure data for next node\nconst cleanData = {\n  name: name,\n  email: email,\n  phone: phoneClean,\n  service: service,\n  company: (data.company || '').trim(),\n  budget: data.budget || '',\n  message: (data.message || '').trim(),\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: cleanData }];"
+      },
+      "id": "validation-node",
+      "name": "Enhanced Data Validation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mock ChatGPT Ad Generation\nconst data = items[0].json;\n\n// Ad templates based on service type\nconst adTemplates = {\n  'web-design': [\n    `🚀 Transform Your Business Online, ${data.name}! Professional web design that converts visitors into customers. Get a stunning website that reflects your brand's excellence.`,\n    `💻 Ready to Stand Out Online? Custom web design tailored for ${data.name}'s success. Modern, responsive, and optimized for results.`,\n    `✨ Your Dream Website Awaits! Professional web design services for ${data.name}. Let's create something amazing together.`\n  ],\n  'marketing': [\n    `📈 Boost Your Business Growth, ${data.name}! Strategic marketing solutions that drive real results. Let's amplify your brand's reach.`,\n    `🎯 Target Success with Precision! Custom marketing strategies for ${data.name}. Reach the right audience at the right time.`,\n    `💡 Marketing That Moves the Needle! Proven strategies to grow ${data.name}'s business. Results-driven campaigns that deliver.`\n  ],\n  'consulting': [\n    `🎯 Expert Guidance for ${data.name}'s Success! Professional consulting to unlock your business potential. Strategic insights that drive growth.`,\n    `💼 Transform Your Business Strategy! Consulting services tailored for ${data.name}. Expert advice, measurable results.`,\n    `🚀 Accelerate Your Growth Journey! Professional consulting for ${data.name}. Strategic solutions for lasting success.`\n  ],\n  'default': [\n    `🌟 Exceptional Service for ${data.name}! Professional solutions tailored to your unique needs. Let's achieve greatness together.`,\n    `💪 Your Success is Our Mission! Premium services designed for ${data.name}. Quality, reliability, and results you can trust.`,\n    `✨ Experience Excellence with ${data.name}! Professional services that exceed expectations. Your success story starts here.`\n  ]\n};\n\n// Select appropriate template\nconst serviceKey = data.service.toLowerCase().replace(/[\\s-]/g, '-');\nconst templates = adTemplates[serviceKey] || adTemplates['default'];\n\n// Randomly select a template (simulating AI variation)\nconst selectedTemplate = templates[Math.floor(Math.random() * templates.length)];\n\n// Add personalization based on company/budget if available\nlet personalizedAd = selectedTemplate;\nif (data.company) {\n  personalizedAd += ` Perfect for ${data.company}'s growth objectives.`;\n}\nif (data.budget && data.budget !== 'not-specified') {\n  personalizedAd += ` Flexible solutions within your ${data.budget} budget range.`;\n}\n\n// Simulate AI processing delay (optional)\n// await new Promise(resolve => setTimeout(resolve, 1000));\n\n// Return enhanced data with generated ad\nconst result = {\n  ...data,\n  generatedAd: personalizedAd,\n  adGeneratedAt: new Date().toISOString(),\n  aiModel: 'Mock-GPT-3.5',\n  processingTime: Math.floor(Math.random() * 2000) + 500 // Mock processing time\n};\n\nreturn [{ json: result }];"
+      },
+      "id": "mock-ai-node",
+      "name": "Mock ChatGPT Ad Generator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [600, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": false,
+          "error": "={{ $json.error.message }}",
+          "message": "Validation failed. Please check your information and try again.",
+          "timestamp": "={{ new Date().toISOString() }}"
+        },
+        "options": {}
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [600, 200]
+    }
+  ],
+  "connections": {
+    "Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Enhanced Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enhanced Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Mock ChatGPT Ad Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock ChatGPT Ad Generator": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "enhanced-mock-ai-v1",
+  "meta": {
+    "templateCreatedBy": "n8n-api-automation"
+  },
+  "tags": ["crm", "mock-ai", "lead-processing", "enhanced"]
+}
