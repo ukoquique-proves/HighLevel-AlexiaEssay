@@ -1,0 +1,78 @@
+{
+  "name": "CRM Lead Processing - Mock HighLevel",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-lead-mock",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-node",
+      "name": "Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced data validation\nconst data = items[0].json;\nconst errors = [];\n\nconst name = (data.name || data.body?.name || '').toString().trim();\nconst email = (data.email || data.body?.email || '').toString().trim().toLowerCase();\nconst phone = (data.phone || data.body?.phone || '').toString().trim();\nconst service = (data.service || data.body?.service || '').toString().trim();\nconst company = (data.company || data.body?.company || '').toString().trim();\nconst budget = (data.budget || data.body?.budget || '').toString();\n\nif (!name) errors.push('Name is required');\nif (!email) errors.push('Email is required');\nif (!phone) errors.push('Phone is required');\nif (!service) errors.push('Service is required');\n\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (email && !emailRegex.test(email)) errors.push('Invalid email format');\n\nconst phoneClean = phone.replace(/[\\s\\-\\(\\)]/g, '');\nif (phone && phoneClean.length < 10) errors.push('Phone number too short');\n\nconst validServices = ['web-design', 'marketing', 'consulting', 'seo', 'social-media'];\nif (service && !validServices.includes(service.toLowerCase())) errors.push('Invalid service type');\n\nif (errors.length > 0) {\n  throw new Error('Validation failed: ' + errors.join(', '));\n}\n\nreturn [{ json: {\n  name: name,\n  email: email,\n  phone: phoneClean,\n  service: service.toLowerCase(),\n  company: company,\n  budget: budget,\n  message: (data.message || data.body?.message || '').toString().trim(),\n  source: 'web-form',\n  timestamp: new Date().toISOString()\n} }];"
+      },
+      "id": "validation-node",
+      "name": "Validate Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mock HighLevel integration\nconst data = items[0].json;\n\nconst mockResponse = {\n  contact: {\n    id: 'mock_contact_' + Math.random().toString(36).substr(2, 9),\n    name: data.name,\n    email: data.email,\n    phone: data.phone,\n    company: data.company,\n    tags: ['web-form', data.service],\n    customFields: {\n      budget: data.budget,\n      service: data.service,\n      source: data.source\n    }\n  },\n  opportunity: {\n    id: 'mock_opportunity_' + Math.random().toString(36).substr(2, 9),\n    name: 'Lead: ' + data.name + ' - ' + data.service,\n    value: 2500,\n    stage: 'New Lead',\n    notes: 'Generated via mock integration.\\n\\nMessage: ' + data.message,\n    tags: ['web-form', data.service]\n  }\n};\n\nreturn [{ json: { ...data, ...mockResponse } }];"
+      },
+      "id": "mock-crm-node",
+      "name": "Mock CRM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": true,
+          "message": "Lead processed successfully (mock integration)!",
+          "leadData": "={{ $json }}",
+          "crmContactId": "={{ $json.contact.id }}",
+          "crmOpportunityId": "={{ $json.opportunity.id }}",
+          "processedAt": "={{ new Date().toISOString() }}"
+        }
+      },
+      "id": "response-node",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [600, 0]
+    }
+  ],
+  "connections": {
+    "Form Webhook": {
+      "main": [[{
+        "node": "Validate Data",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Validate Data": {
+      "main": [[{
+        "node": "Mock CRM",
+        "type": "main",
+        "index": 0
+      }]]
+    },
+    "Mock CRM": {
+      "main": [[{
+        "node": "Success Response",
+        "type": "main",
+        "index": 0
+      }]]
+    }
+  }
+}
