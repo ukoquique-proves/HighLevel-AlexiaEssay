@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Web-based Test Dashboard**: `hector-test-dashboard.html` for comprehensive, console-free testing of all workflow inputs/outputs across all phases (API, data capture, AI, monitoring)
 - **Fashion SME Extensibility**: Workflow now supports business verticals via `businessType` and fashion-specific fields
 - **Documentation Updates**: All relevant .md files reference the dashboard and new testing approach
+- **Groq API Setup Guide**: Added instructions for getting a free, OpenAI-compatible API key to `API_SETUP_GUIDE.md`
 
 ### Enhanced
 - **Dashboard Error Handling**: Now gracefully handles empty and non-JSON error responses from n8n, showing clear messages for validation and server errors
